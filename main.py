@@ -1,55 +1,124 @@
-from fastapi import FastAPI, Body
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel v44.2 - Komchén</title>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #020617; padding: 25px; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h1 { color: #22d3ee; margin-top: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-top: -10px; margin-bottom: 25px; }
+        label { display: block; font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        input { background: #0f172a; border: 1px solid #475569; border-radius: 6px; padding: 10px; color: #f8fafc; width: 95%; font-size: 16px; margin-bottom: 15px; }
+        button { background: #0891b2; color: #020617; font-weight: bold; text-transform: uppercase; padding: 12px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-size: 14px; margin-top: 10px; }
+        button:hover { background: #06b6d4; }
+        .box { background: #0f172a; border: 1px solid #1e293b; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .metric { background: #0f172a; border: 1px solid #1e293b; padding: 15px; border-radius: 8px; }
+        .value { font-size: 28px; font-weight: bold; font-family: monospace; color: #22d3ee; margin: 5px 0; }
+        .status-badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 20px; text-transform: uppercase; margin-bottom: 10px; }
+        .success-bg { background: #064e3b; color: #34d399; border: 1px solid #047857; }
+        .danger-bg { background: #4c1d95; color: #a78bfa; border: 1px solid #6d28d9; }
+    </style>
+</head>
+<body>
 
-app = FastAPI(
-    title="API Framework v44.2",
-    description="Sistema de Prediccion de Vorticidad para Ciclones - Komchen",
-    version="1.0"
-)
-
-# ESTO ELIMINA CUALQUIER BLOQUEO DE SEGURIDAD (CORS) EN TU NAVEGADOR
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class DatosCiclon(BaseModel):
-    nombre: str
-    presion_hpa: float
-    vientos_kmh: float
-
-@app.get("/")
-def inicio():
-    return {"mensaje": "API v44.2 Activa. Desarrollado en Komchen, Yucatan. Ve a /docs para probar."}
-
-@app.post("/api/v1/predecir")
-def calcular_balance(datos: DatosCiclon = Body(...)):
-    # Calibración matemática exacta de tu fórmula v44.2
-    if datos.vientos_kmh < 85:
-        r_source = 1.55  
-    elif datos.presion_hpa > 990:
-        r_source = 2.18  
-    else:
-        r_source = 4.15  
+    <div class="container">
+        <h1>Framework Predictivo v44.2</h1>
+        <div class="subtitle">Grupo de Dinámica Atmosférica Avanzada • Komchén, Yucatán</div>
         
-    arrastre_eje = -0.20  # Lema 2 certificado por Krawczyk
-    balance = -1.0 + arrastre_eje + r_source
-    blow_up = r_source >= 2.20 and balance > 0
-    
-    return {
-        "ciclon": datos.nombre,
-        "metricas": {
-            "r_source": round(r_source, 2),
-            "balance_neto": round(balance, 2)
-        },
-        "diagnostico": {
-            "blow_up_landfall": blow_up,
-            "resultado": "ALERTA: Blow-up / Landfall Detectado" if blow_up else "Regularidad: Zero Landfall / Disipacion",
-            "detalles": "El sistema presenta inyeccion critica." if blow_up else "Inyeccion insuficiente. El sistema ira a aguas abiertas."
-        },
-        "contacto": "Grupo de Dinamica Atmosferica Avanzada, Komchen, Yucatan."
-    }
+        <div>
+            <label>Nombre del Ciclón</label>
+            <input type="text" id="nombreInput" value="Vance">
+            
+            <label>Presión Central Mínima (hPa / mb)</label>
+            <input type="number" id="presionInput" value="995">
+            
+            <label>Vientos Sostenidos (km/h)</label>
+            <input type="number" id="vientoInput" value="100">
+            
+            <button type="button" onclick="calcularModelo()">Ejecutar Simulación Ciega</button>
+        </div>
+
+        <div class="box" id="cuadroDiagnostico">
+            <div id="resultadoMensaje" style="text-align: center; color: #64748b; padding: 10px 0;">
+                Esperando parámetros cinemáticos... Presiona el botón para procesar el Teorema 50.
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="metric">
+                <label>Magnitud Fuente (R_source)</label>
+                <div class="value" id="sourceValor">--</div>
+                <div style="font-size: 10px; color: #475569;">Umbral de activación: &ge; 2.20</div>
+            </div>
+            <div class="metric">
+                <label>Balance Neto (B)</label>
+                <div class="value" id="balanceValor">--</div>
+                <div style="font-size: 10px; color: #475569;">Inestabilidad activa si B > 0</div>
+            </div>
+        </div>
+        
+        <div style="font-size: 11px; color: #475569; margin-top: 25px; border-top: 1px solid #1e293b; padding-top: 10px;">
+            Contacto Científico: Grupo de Dinámica Atmosférica Avanzada, Komchén, Yucatán.
+        </div>
+    </div>
+
+    <script>
+        async function calcularModelo() {
+            const nombre = document.getElementById('nombreInput').value;
+            const presion = parseFloat(document.getElementById('presionInput').value);
+            const viento = parseFloat(document.getElementById('vientoInput').value);
+            
+            const cuadro = document.getElementById('cuadroDiagnostico');
+            const sourceText = document.getElementById('sourceValor');
+            const balanceText = document.getElementById('balanceValor');
+            
+            cuadro.innerHTML = '<div style="text-align:center; color:#22d3ee; font-family:monospace;">PROCESANDO EN LA NUBE CENTRAL...</div>';
+            
+            try {
+                // Dirección corregida y unificada apuntando exactamente a la ruta de tu API real
+                const res = await fetch('https://onrender.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        presion_hpa: presion,
+                        vientos_kmh: viento
+                    })
+                });
+                
+                if (!res.ok) throw new Error('Error de respuesta.');
+                const datos = await res.json();
+                
+                sourceText.innerText = datos.metricas.r_source.toFixed(2);
+                balanceText.innerText = (datos.metricas.balance_neto >= 0 ? '+' : '') + datos.metricas.balance_neto.toFixed(2);
+                
+                const esBlowUp = datos.diagnostico.resultado.includes("ALERTA");
+                
+                if (esBlowUp) {
+                    cuadro.innerHTML = `
+                        <div class="status-badge danger-bg">Alerta Máxima Crítica</div>
+                        <h3 style="margin:5px 0; color:#a78bfa; font-size:18px;">${datos.diagnostico.resultado}</h3>
+                        <p style="margin:0; font-size:13px; color:#94a3b8; line-height:1.4;">${datos.diagnostico.detalles}</p>
+                    `;
+                    sourceText.style.color = "#a78bfa";
+                    balanceText.style.color = "#a78bfa";
+                } else {
+                    cuadro.innerHTML = `
+                        <div class="status-badge success-bg">Regularidad Certificada</div>
+                        <h3 style="margin:5px 0; color:#34d399; font-size:18px;">${datos.diagnostico.resultado}</h3>
+                        <p style="margin:0; font-size:13px; color:#94a3b8; line-height:1.4;">${datos.diagnostico.detalles}</p>
+                    `;
+                    sourceText.style.color = "#22d3ee";
+                    balanceText.style.color = "#22d3ee";
+                }
+                
+            } catch (err) {
+                cuadro.innerHTML = '<div style="text-align:center; color:#f87171; font-size:13px;">Error de conexión con tu servidor central de Render.<br><span style="color:#475569; font-size:11px;">Asegúrate de que la API esté respondiendo sin bloqueos.</span></div>';
+            }
+        }
+    </script>
+</body>
+</html>
