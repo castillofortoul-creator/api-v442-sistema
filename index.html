@@ -55,32 +55,48 @@
 
 <script>
 async function calculateModule() {
-    const vance = document.getElementById('vance').value;
-    const presion = document.getElementById('presion_central_minima').value;
-    const vientos = document.getElementById('vientos_sostenidos').value;
+    // 1. Obtener los elementos del formulario
+    const inputVance = document.getElementById('vance');
+    const inputPresion = document.getElementById('presion_central_minima');
+    const inputVientos = document.getElementById('vientos_sostenidos');
     
     const errorContainer = document.getElementById('error-container');
     const resultsContainer = document.getElementById('results-container');
     
+    // 2. Limpiar estados anteriores
     errorContainer.style.display = "none";
     resultsContainer.style.display = "none";
     
+    // 3. Validar que los campos existan antes de leer sus valores
+    if (!inputVance || !inputPresion || !inputVientos) {
+        errorContainer.innerText = "Error interno: No se encontraron los campos del formulario en el HTML.";
+        errorContainer.style.display = "block";
+        return;
+    }
+    
+    const vanceValue = inputVance.value;
+    const presionValue = inputPresion.value;
+    const vientosValue = inputVientos.value;
+    
     try {
-        const res = await fetch(`https://onrender.com{vance}&presion_central_minima=${presion}&vientos_sostenidos=${vientos}`);
+        // 4. Hacer la petición directa a Render
+        const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
+        const res = await fetch(url);
         
         if (!res.ok) {
-            throw new Error("Error en la respuesta del servidor");
+            throw new Error(`El servidor respondió con código: ${res.status}`);
         }
         
         const data = await res.json();
         
+        // 5. Inyectar las respuestas del backend en la interfaz
         document.getElementById('r_source_val').innerText = data.r_source;
         document.getElementById('balance_val').innerText = data.balance;
         document.getElementById('diag_val').innerText = data.resultado;
         
         resultsContainer.style.display = "block";
     } catch (err) {
-        errorContainer.innerText = "Error de conexión con el servidor central de Render. Asegúrate de que la API de Render haya terminado de iniciar (las cuentas gratis demoran un poco en despertar si no se usan).";
+        errorContainer.innerText = "Error de conexión: No se pudo comunicar con ://onrender.com. Detalles del error: " + err.message;
         errorContainer.style.display = "block";
     }
 }
