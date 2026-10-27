@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Framework Predictivo V44.2</title>
     <style>
-        body { font-family: sans-serif; background-color: #1a1a1a; color: #ffffff; margin: 20px; }
-        .container { max-width: 600px; margin: auto; padding: 20px; background-color: #2a2a2a; border-radius: 8px; }
+        body { font-family: sans-serif; background-color: #0c1917; color: #ffffff; margin: 20px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; background-color: #112622; border: 2px solid #00ffcc; border-radius: 8px; }
         h2 { text-align: center; color: #00ffcc; border-bottom: 2px solid #00ffcc; padding-bottom: 10px; margin-top: 0; }
         h4 { text-align: center; color: #aaaaaa; margin-top: -5px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background-color: #00cc99; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #00aa88; }
-        .results { margin-top: 20px; padding: 15px; background-color: #333; border-radius: 4px; border-left: 5px solid #00ffcc; }
-        .error { margin-top: 20px; padding: 15px; background-color: #4a1a1a; border-radius: 4px; border-left: 5px solid #ff3333; color: #ff9999; text-align: center; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #00ffcc; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; background-color: #0c1917; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #00aa88; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #00ffcc; color: #0c1917; }
+        .results { margin-top: 20px; padding: 15px; background-color: #0c1917; border-radius: 4px; border: 1px solid #00ffcc; }
+        .error { margin-top: 20px; padding: 15px; background-color: #4a1a1a; border-radius: 4px; border-left: 5px solid #ff3333; color: #ff9999; text-align: center; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     </style>
 </head>
@@ -27,18 +27,18 @@
     
     <div class="form-group">
         <label for="vance">NOMBRE DEL CICLÓN</label>
-        <input type="text" id="vance" value="Vance">
+        <input type="text" id="vance" value="patricia">
     </div>
     
     <div class="grid">
         <div class="form-group">
             <label for="presion_central_minima">PRESIÓN CENTRAL MÍNIMA (HPA / MB)</label>
-            <input type="number" id="presion_central_minima" value="995">
+            <input type="number" id="presion_central_minima" value="950">
         </div>
         
         <div class="form-group">
             <label for="vientos_sostenidos">VIENTOS SOSTENIDOS (KM/H)</label>
-            <input type="number" id="vientos_sostenidos" value="100">
+            <input type="number" id="vientos_sostenidos" value="165">
         </div>
     </div>
     
@@ -47,17 +47,17 @@
     <div id="error-container" class="error" style="display: none;"></div>
     
     <div id="results-container" class="results" style="display: none;">
-        <p><strong>Magnitud Fuente (R_SOURCE):</strong> <span id="r_source_val"></span></p>
-        <p><strong>Balance Neto (B):</strong> <span id="balance_val"></span></p>
-        <p><strong>Estatus del Diagnóstico:</strong> <span id="diag_val"></span></p>
+        <p><strong>MAGNITUD FUENTE (R_SOURCE):</strong> <span id="r_source_val"></span></p>
+        <p><strong>BALANCE NETO (B):</strong> <span id="balance_val"></span></p>
+        <p><strong>ESTATUS DEL DIAGNÓSTICO:</strong> <span id="diag_val"></span></p>
     </div>
 </div>
 
 <script>
 async function calculateModule() {
     const vance = document.getElementById('vance').value;
-    const presion_central_minima = document.getElementById('presion_central_minima').value;
-    const vientos_sostenidos = document.getElementById('vientos_sostenidos').value;
+    const presion = document.getElementById('presion_central_minima').value;
+    const vientos = document.getElementById('vientos_sostenidos').value;
     
     const errorContainer = document.getElementById('error-container');
     const resultsContainer = document.getElementById('results-container');
@@ -66,8 +66,7 @@ async function calculateModule() {
     resultsContainer.style.display = "none";
     
     try {
-        // AQUÍ ESTÁ LA URL CORREGIDA DE TU SERVIDOR DE RENDER:
-        const res = await fetch(`https://onrender.com{vance}&presion_central_minima=${presion_central_minima}&vientos_sostenidos=${vientos_sostenidos}`);
+        const res = await fetch(`https://onrender.com{vance}&presion_central_minima=${presion}&vientos_sostenidos=${vientos}`);
         
         if (!res.ok) {
             throw new Error("Error en la respuesta del servidor");
