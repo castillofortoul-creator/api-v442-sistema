@@ -7,12 +7,8 @@ app = FastAPI(
     version="1.0"
 )
 
-# Orígenes explícitos para asegurar la compatibilidad con tu dominio de GitHub Pages
-origins = [
-    "https://github.io",
-    "http://localhost",
-    "http://127.0.0.1"
-]
+# Configuración global de orígenes permitidos
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
