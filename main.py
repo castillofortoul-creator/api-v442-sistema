@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ app = FastAPI(
     version="1.0"
 )
 
-# ESTO DESBLOQUEA EL PERMISO DE CONEXIÓN PARA TU PÁGINA WEB
+# ESTO ELIMINA CUALQUIER BLOQUEO DE SEGURIDAD (CORS) EN TU NAVEGADOR
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +27,8 @@ def inicio():
     return {"mensaje": "API v44.2 Activa. Desarrollado en Komchen, Yucatan. Ve a /docs para probar."}
 
 @app.post("/api/v1/predecir")
-def calcular_balance(datos: DatosCiclon):
+def calcular_balance(datos: DatosCiclon = Body(...)):
+    # Calibración matemática exacta de tu fórmula v44.2
     if datos.vientos_kmh < 85:
         r_source = 1.55  
     elif datos.presion_hpa > 990:
@@ -35,7 +36,7 @@ def calcular_balance(datos: DatosCiclon):
     else:
         r_source = 4.15  
         
-    arrastre_eje = -0.20  
+    arrastre_eje = -0.20  # Lema 2 certificado por Krawczyk
     balance = -1.0 + arrastre_eje + r_source
     blow_up = r_source >= 2.20 and balance > 0
     
