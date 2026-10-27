@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel v44.2 - Komchén</title>
-    <!-- Motor de diseño clásico 100% compatible -->
     <script src="https://tailwindcss.com"></script>
     <style>
         .radar-pulse {
@@ -18,7 +17,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
-    <!-- Encabezado -->
     <header class="border-b border-slate-800 bg-slate-950 p-6 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
@@ -32,10 +30,8 @@
         </div>
     </header>
 
-    <!-- Contenido -->
     <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Formulario -->
         <section class="lg:col-span-1 bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg flex flex-col justify-between">
             <div class="space-y-5">
                 <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-3 mb-4">Variables del Ciclón (t₀)</h2>
@@ -61,7 +57,6 @@
             </button>
         </section>
 
-        <!-- Resultados -->
         <section class="lg:col-span-2 space-y-6">
             
             <div id="contenedorDiagnostico" class="bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center">
@@ -98,7 +93,6 @@
         </section>
     </main>
 
-    <!-- Lógica de Conexión Corregida -->
     <script>
         async function correrSimulacion() {
             const nombre = document.getElementById('nombre').value;
@@ -119,7 +113,6 @@
             resultadoContenido.classList.add('hidden');
 
             try {
-                // Dirección corregida apuntando exactamente al endpoint de tu API v44.2
                 const respuesta = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -139,7 +132,7 @@
 
                 valorSource.innerText = datos.metricas.r_source.toFixed(2);
                 valorBalance.innerText = (datos.metricas.balance_neto >= 0 ? '+' : '') + datos.metricas.balance_neto.toFixed(2);
-                textoContacto.innerText = datos.contacto_desarrollador.grupo + ", " + datos.contacto_desarrollador.ubicacion;
+                textoContacto.innerText = datos.contacto;
 
                 const esBlowUp = datos.diagnostico.resultado.includes("ALERTA");
                 
@@ -163,7 +156,9 @@
                 textoDetalles.innerText = datos.diagnostico.detalles;
 
             } catch (error) {
-estadoInicial.classList.remove('hidden');
-estadoInicial.innerHTML = <p class="text-sm font-medium text-red-400">Error: Conectando con Render...</p><p class="text-xs text-slate-500 mt-1">Reintenta en 10 segundos.</p>;
-}
-}
+                estadoInicial.innerHTML = `<p class="text-sm font-medium text-red-400">Error de conexión con Render.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
