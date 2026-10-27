@@ -7,12 +7,16 @@ app = FastAPI(
     version="1.0"
 )
 
-# Configuración de CORS corregida
-origins = ["*"]
+# Configuramos explícitamente los orígenes permitidos para evitar bloqueos de CORS
+origins = [
+    "https://github.io",
+    "http://localhost",
+    "http://127.0.0.1"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # <-- Aquí ya tiene la 's' correcta
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
