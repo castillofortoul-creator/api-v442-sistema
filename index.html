@@ -55,31 +55,17 @@
 
 <script>
 async function calculateModule() {
-    // 1. Obtener los elementos del formulario
-    const inputVance = document.getElementById('vance');
-    const inputPresion = document.getElementById('presion_central_minima');
-    const inputVientos = document.getElementById('vientos_sostenidos');
+    const vanceValue = document.getElementById('vance').value;
+    const presionValue = document.getElementById('presion_central_minima').value;
+    const vientosValue = document.getElementById('vientos_sostenidos').value;
     
     const errorContainer = document.getElementById('error-container');
     const resultsContainer = document.getElementById('results-container');
     
-    // 2. Limpiar estados anteriores
     errorContainer.style.display = "none";
     resultsContainer.style.display = "none";
     
-    // 3. Validar que los campos existan antes de leer sus valores
-    if (!inputVance || !inputPresion || !inputVientos) {
-        errorContainer.innerText = "Error interno: No se encontraron los campos del formulario en el HTML.";
-        errorContainer.style.display = "block";
-        return;
-    }
-    
-    const vanceValue = inputVance.value;
-    const presionValue = inputPresion.value;
-    const vientosValue = inputVientos.value;
-    
     try {
-        // 4. Hacer la petición directa a Render
         const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
         const res = await fetch(url);
         
@@ -89,7 +75,6 @@ async function calculateModule() {
         
         const data = await res.json();
         
-        // 5. Inyectar las respuestas del backend en la interfaz
         document.getElementById('r_source_val').innerText = data.r_source;
         document.getElementById('balance_val').innerText = data.balance;
         document.getElementById('diag_val').innerText = data.resultado;
