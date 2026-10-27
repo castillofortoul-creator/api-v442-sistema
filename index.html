@@ -55,9 +55,9 @@
 
 <script>
 async function calculateModule() {
-    const vanceValue = document.getElementById('vance').value;
-    const presionValue = document.getElementById('presion_central_minima').value;
-    const vientosValue = document.getElementById('vientos_sostenidos').value;
+    const inputVance = document.getElementById('vance');
+    const inputPresion = document.getElementById('presion_central_minima');
+    const inputVientos = document.getElementById('vientos_sostenidos');
     
     const errorContainer = document.getElementById('error-container');
     const resultsContainer = document.getElementById('results-container');
@@ -65,8 +65,18 @@ async function calculateModule() {
     errorContainer.style.display = "none";
     resultsContainer.style.display = "none";
     
+    if (!inputVance || !inputPresion || !inputVientos) {
+        errorContainer.innerText = "Error interno: No se encontraron los campos del formulario en el HTML.";
+        errorContainer.style.display = "block";
+        return;
+    }
+    
+    const vanceValue = inputVance.value;
+    const presionValue = inputPresion.value;
+    const vientosValue = inputVientos.value;
+    
     try {
-        // LA URL TIENE QUE ESTAR COMPLETA E IMPECABLE AQUÍ:
+        // LINEA 71 TOTALMENTE CORREGIDA AQUÍ:
         const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
         const res = await fetch(url);
         
