@@ -8,7 +8,7 @@ app = FastAPI(
     version="1.0"
 )
 
-# Permitir conexiones desde cualquier pagina web (GitHub Pages)
+# ESTO INDISPENSABLE: Permite que tu pagina web se conecte sin bloqueos
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,7 +35,7 @@ def calcular_balance(datos: DatosCiclon):
     else:
         r_source = 4.15  
         
-    arrastre_eje = -0.20  # Lema 2
+    arrastre_eje = -0.20  
     balance = -1.0 + arrastre_eje + r_source
     blow_up = r_source >= 2.20 and balance > 0
     
