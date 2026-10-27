@@ -98,7 +98,7 @@
         </section>
     </main>
 
-    <!-- Lógica de Conexión -->
+    <!-- Lógica de Conexión Corregida -->
     <script>
         async function correrSimulacion() {
             const nombre = document.getElementById('nombre').value;
@@ -119,6 +119,7 @@
             resultadoContenido.classList.add('hidden');
 
             try {
+                // Dirección corregida apuntando exactamente al endpoint de tu API v44.2
                 const respuesta = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -138,7 +139,7 @@
 
                 valorSource.innerText = datos.metricas.r_source.toFixed(2);
                 valorBalance.innerText = (datos.metricas.balance_neto >= 0 ? '+' : '') + datos.metricas.balance_neto.toFixed(2);
-                textoContacto.innerText = datos.contacto;
+                textoContacto.innerText = datos.contacto_desarrollador.grupo + ", " + datos.contacto_desarrollador.ubicacion;
 
                 const esBlowUp = datos.diagnostico.resultado.includes("ALERTA");
                 
@@ -162,7 +163,7 @@
                 textoDetalles.innerText = datos.diagnostico.detalles;
 
             } catch (error) {
-                estadoInicial.classList.remove('hidden');
+estadoInicial.classList.remove('hidden');
 estadoInicial.innerHTML = <p class="text-sm font-medium text-red-400">Error: Conectando con Render...</p><p class="text-xs text-slate-500 mt-1">Reintenta en 10 segundos.</p>;
 }
 }
