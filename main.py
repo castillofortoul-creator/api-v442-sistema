@@ -1,10 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(
     title="API Framework v44.2",
     description="Sistema de Prediccion de Vorticidad para Ciclones - Komchen",
     version="1.0"
+)
+
+# Permitir conexiones desde cualquier pagina web (GitHub Pages)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class DatosCiclon(BaseModel):
@@ -16,7 +26,7 @@ class DatosCiclon(BaseModel):
 def inicio():
     return {"mensaje": "API v44.2 Activa. Desarrollado en Komchen, Yucatan. Ve a /docs para probar."}
 
-@app.post("/predecir")
+@app.post("/api/v1/predecir")
 def calcular_balance(datos: DatosCiclon):
     # Calibracion matematica de tu formula v44.2
     if datos.vientos_kmh < 85:
@@ -37,6 +47,7 @@ def calcular_balance(datos: DatosCiclon):
             "balance_neto": round(balance, 2)
         },
         "diagnostico": {
+            "blow_up_landfall": blow_up,
             "resultado": "ALERTA: Blow-up / Landfall Detectado" if blow_up else "Regularidad: Zero Landfall / Disipacion",
             "detalles": "El sistema presenta inyeccion critica." if blow_up else "Inyeccion insuficiente. El sistema ira a aguas abiertas."
         },
