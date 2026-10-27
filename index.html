@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel v44.2 - Komchén</title>
+    <!-- Motor de estilos compatible con GitHub Pages -->
     <script src="https://tailwindcss.com"></script>
     <style>
         .radar-pulse {
@@ -17,6 +18,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
+    <!-- Encabezado -->
     <header class="border-b border-slate-800 bg-slate-950 p-6 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
@@ -30,8 +32,10 @@
         </div>
     </header>
 
+    <!-- Contenido Principal -->
     <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
+        <!-- Formulario de entrada -->
         <section class="lg:col-span-1 bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg flex flex-col justify-between">
             <div class="space-y-5">
                 <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-3 mb-4">Variables del Ciclón (t₀)</h2>
@@ -57,6 +61,7 @@
             </button>
         </section>
 
+        <!-- Bloque de Resultados -->
         <section class="lg:col-span-2 space-y-6">
             
             <div id="contenedorDiagnostico" class="bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center">
@@ -93,6 +98,7 @@
         </section>
     </main>
 
+    <!-- Conexión Unificada Directa -->
     <script>
         async function correrSimulacion() {
             const nombre = document.getElementById('nombre').value;
@@ -113,6 +119,7 @@
             resultadoContenido.classList.add('hidden');
 
             try {
+                // Ruta corregida apuntando exactamente al endpoint raíz de tu código de Python
                 const respuesta = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -156,9 +163,7 @@
                 textoDetalles.innerText = datos.diagnostico.detalles;
 
             } catch (error) {
-                estadoInicial.innerHTML = `<p class="text-sm font-medium text-red-400">Error de conexión con Render.</p>`;
-            }
-        }
-    </script>
-</body>
-</html>
+estadoInicial.classList.remove('hidden');
+estadoInicial.innerHTML = <p class="text-sm font-medium text-red-400">Error de conexión: El servidor gratuito de Render se fue a dormir.</p><p class="text-xs text-slate-500 mt-1">Abre ://onrender.com en otra pestaña para despertarlo.</p>;
+}
+}
