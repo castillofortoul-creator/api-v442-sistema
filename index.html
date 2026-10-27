@@ -78,7 +78,7 @@
             cuadro.innerHTML = '<div style="text-align:center; color:#22d3ee; font-family:monospace;">PROCESANDO EN LA NUBE CENTRAL...</div>';
             
             try {
-                // Dirección corregida y unificada apuntando exactamente a la ruta de tu API real
+                // Sincronización con el protocolo seguro HTTPS obligatorio
                 const res = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -116,7 +116,7 @@
                 }
                 
             } catch (err) {
-                cuadro.innerHTML = '<div style="text-align:center; color:#f87171; font-size:13px;">Error de conexión con tu servidor central de Render.<br><span style="color:#475569; font-size:11px;">Asegúrate de que la API esté respondiendo sin bloqueos.</span></div>';
+                cuadro.innerHTML = '<div style="text-align:center; color:#f87171; font-size:13px;">Error de conexión con tu servidor central de Render.<br><span style="color:#475569; font-size:11px;">La API gratuita está despertando. Espera 10 segundos y reintenta.</span></div>';
             }
         }
     </script>
