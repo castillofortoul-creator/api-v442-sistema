@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Meteorológico - Framework v44.2</title>
-    <!-- Tailwind CSS para diseño profesional rápido -->
-    <script src="https://jsdelivr.net"></script>
+    <title>Panel v44.2 - Komchén</title>
+    <!-- Motor de diseño clásico 100% compatible -->
+    <script src="https://tailwindcss.com"></script>
     <style>
         .radar-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -18,7 +18,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
-    <!-- Encabezado Principal -->
+    <!-- Encabezado -->
     <header class="border-b border-slate-800 bg-slate-950 p-6 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
@@ -27,51 +27,45 @@
             </div>
             <div class="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
                 <div class="w-3 h-3 bg-emerald-500 rounded-full radar-pulse"></div>
-                <span class="text-xs font-mono text-emerald-400 tracking-wider">SERVIDOR DE NUBE EN VIVO</span>
+                <span class="text-xs font-mono text-emerald-400 tracking-wider">SERVIDOR EN VIVO</span>
             </div>
         </div>
     </header>
 
+    <!-- Contenido -->
     <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Panel Izquierdo: Formulario de Entrada -->
+        <!-- Formulario -->
         <section class="lg:col-span-1 bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg flex flex-col justify-between">
-            <div>
-                <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-3 mb-6">Variables del Ciclón (t₀)</h2>
+            <div class="space-y-5">
+                <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-3 mb-4">Variables del Ciclón (t₀)</h2>
                 
-                <form id="formSimulacion" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Nombre del Sistema</label>
-                        <input type="text" id="nombre" value="Vance" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 font-medium">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Presión Central Mínima (hPa / mb)</label>
-                        <input type="number" id="presion" value="995" step="any" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono font-semibold">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Vientos Sostenidos (km/h)</label>
-                        <input type="number" id="viento" value="100" step="any" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono font-semibold">
-                    </div>
-                </form>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Nombre del Sistema</label>
+                    <input type="text" id="nombre" value="Vance" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-500">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Presión Central Mínima (hPa / mb)</label>
+                    <input type="number" id="presion" value="995" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Vientos Sostenidos (km/h)</label>
+                    <input type="number" id="viento" value="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+                </div>
             </div>
 
-            <button type="button" onclick="correrSimulacion()"
-                class="w-full mt-8 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-slate-950 font-bold uppercase tracking-wider py-3.5 rounded-lg transition-colors cursor-pointer shadow-md shadow-cyan-950">
+            <button type="button" onclick="correrSimulacion()" class="w-full mt-6 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase tracking-wider py-3 rounded-lg transition-colors cursor-pointer shadow-md">
                 Ejecutar Simulación Ciega
             </button>
         </section>
 
-        <!-- Panel Derecho: Resultados y Visualización -->
+        <!-- Resultados -->
         <section class="lg:col-span-2 space-y-6">
             
-            <!-- Cuadro de Diagnóstico Principal -->
-            <div id="contenedorDiagnostico" class="bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center transition-all duration-300">
-                <div class="text-center text-slate-500 py-6" id="estadoInicial">
+            <div id="contenedorDiagnostico" class="bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center">
+                <div class="text-center text-slate-500 py-4" id="estadoInicial">
                     <p class="text-sm font-medium tracking-wide">Esperando parámetros cinemáticos...</p>
                     <p class="text-xs mt-1 text-slate-600">Presiona el botón para procesar el Teorema 50</p>
                 </div>
@@ -83,7 +77,6 @@
                 </div>
             </div>
 
-            <!-- Métricas Secundarias Numéricas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-md">
                     <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">Magnitud de la Fuente (R_source)</p>
@@ -93,30 +86,25 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-md">
                     <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">Balance Neto Estructural (B)</p>
                     <p id="valorBalance" class="text-3xl font-mono font-bold text-slate-400 mt-2">--</p>
-                    <p class="text-[10px] text-slate-600 mt-1">Inestabilidad persistente activa si B > 0</p>
+                    <p class="text-[10px] text-slate-600 mt-1">Inestabilidad activa si B > 0</p>
                 </div>
             </div>
 
-            <!-- Información del Desarrollador / Contacto Comercial -->
-            <footer class="bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs text-slate-400">
-                <div>
-                    <p class="font-semibold text-slate-300">Contacto Científico e Integración SaaS:</p>
-                    <p class="mt-0.5" id="textoContacto">Grupo de Dinámica Atmosférica Avanzada</p>
-                </div>
-                <span class="px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-md font-mono">v44.2-STABLE</span>
+            <footer class="bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-md text-xs text-slate-400">
+                <p class="font-semibold text-slate-300">Contacto Científico e Integración SaaS:</p>
+                <p class="mt-0.5" id="textoContacto">Grupo de Dinámica Atmosférica Avanzada</p>
             </footer>
 
         </section>
     </main>
 
-    <!-- Script de Lógica e Integración con tu API en Vivo -->
+    <!-- Lógica de Conexión -->
     <script>
         async function correrSimulacion() {
             const nombre = document.getElementById('nombre').value;
             const presion = parseFloat(document.getElementById('presion').value);
             const viento = parseFloat(document.getElementById('viento').value);
 
-            // Elementos de la interfaz para actualizar
             const estadoInicial = document.getElementById('estadoInicial');
             const resultadoContenido = document.getElementById('resultadoContenido');
             const badgeResultado = document.getElementById('badgeResultado');
@@ -131,7 +119,6 @@
             resultadoContenido.classList.add('hidden');
 
             try {
-                // LLAMADA EN VIVO A TU API ASIGNADA EN RENDER
                 const respuesta = await fetch('https://onrender.com', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -142,42 +129,40 @@
                     })
                 });
 
-                if (!respuesta.ok) throw new Error('Error en el procesamiento del servidor.');
+                if (!respuesta.ok) throw new Error('Error en el servidor.');
 
                 const datos = await respuesta.json();
                 
-                // Ocultar estado de carga
                 estadoInicial.classList.add('hidden');
                 resultadoContenido.classList.remove('hidden');
 
-                // Inyectar datos numéricos procesados por tu fórmula
                 valorSource.innerText = datos.metricas.r_source.toFixed(2);
                 valorBalance.innerText = (datos.metricas.balance_neto >= 0 ? '+' : '') + datos.metricas.balance_neto.toFixed(2);
                 textoContacto.innerText = datos.contacto;
 
-                // Cambiar colores e interfaz según el diagnóstico arrojado
                 const esBlowUp = datos.diagnostico.resultado.includes("ALERTA");
                 
                 if (esBlowUp) {
                     badgeResultado.innerText = "ALERTA MÁXIMA CRÍTICA";
                     badgeResultado.className = "inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-red-950 text-red-400 border border-red-800";
                     textoDiagnostico.className = "text-xl font-bold tracking-tight text-red-400 mb-2";
-contenedorDiagnostico.className = "bg-slate-950 border border-red-900 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center transition-all duration-300";
-valorSource.className = "text-3xl font-mono font-bold text-red-400 mt-2";
-valorBalance.className = "text-3xl font-mono font-bold text-red-400 mt-2";
-} else {
-badgeResultado.innerText = "REGULARIDAD GLOBAL CERTIFICADA";
-badgeResultado.className = "inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-emerald-950 text-emerald-400 border border-emerald-800";
-textoDiagnostico.className = "text-xl font-bold tracking-tight text-emerald-400 mb-2";
-contenedorDiagnostico.className = "bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg min-h-[160px] flex flex-col justify-center transition-all duration-300";
-valorSource.className = "text-3xl font-mono font-bold text-cyan-400 mt-2";
-valorBalance.className = "text-3xl font-mono font-bold text-cyan-400 mt-2";
-}
-textoDiagnostico.innerText = datos.diagnostico.resultado;
-textoDetalles.innerText = datos.diagnostico.detalles;
-} catch (error) {
-estadoInicial.classList.remove('hidden');
-estadoInicial.innerHTML = <p class="text-sm font-medium text-red-400">Error de conexión: El servidor gratuito está despertando.</p><p class="text-xs text-slate-500 mt-1">Reintenta en 20 segundos.</p>;
-console.error(error);
+                    contenedorDiagnostico.className = "bg-slate-950 border border-red-900 rounded-xl p-6 shadow-lg flex flex-col justify-center";
+                    valorSource.className = "text-3xl font-mono font-bold text-red-400 mt-2";
+                    valorBalance.className = "text-3xl font-mono font-bold text-red-400 mt-2";
+                } else {
+                    badgeResultado.innerText = "REGULARIDAD GLOBAL CERTIFICADA";
+                    badgeResultado.className = "inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-emerald-950 text-emerald-400 border border-emerald-800";
+                    textoDiagnostico.className = "text-xl font-bold tracking-tight text-emerald-400 mb-2";
+                    contenedorDiagnostico.className = "bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-lg flex flex-col justify-center";
+                    valorSource.className = "text-3xl font-mono font-bold text-cyan-400 mt-2";
+                    valorBalance.className = "text-3xl font-mono font-bold text-cyan-400 mt-2";
+                }
+
+                textoDiagnostico.innerText = datos.diagnostico.resultado;
+                textoDetalles.innerText = datos.diagnostico.detalles;
+
+            } catch (error) {
+                estadoInicial.classList.remove('hidden');
+estadoInicial.innerHTML = <p class="text-sm font-medium text-red-400">Error: Conectando con Render...</p><p class="text-xs text-slate-500 mt-1">Reintenta en 10 segundos.</p>;
 }
 }
