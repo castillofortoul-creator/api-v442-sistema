@@ -76,7 +76,7 @@ async function calculateModule() {
     const vientosValue = inputVientos.value;
     
     try {
-        // LINEA 71 TOTALMENTE CORREGIDA AQUÍ:
+        // RUTA COMPLETA CORREGIDA CON API-V442 EN LA LÍNEA 75:
         const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
         const res = await fetch(url);
         
