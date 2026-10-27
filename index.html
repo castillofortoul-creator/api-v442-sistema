@@ -66,6 +66,7 @@ async function calculateModule() {
     resultsContainer.style.display = "none";
     
     try {
+        // LA URL TIENE QUE ESTAR COMPLETA E IMPECABLE AQUÍ:
         const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
         const res = await fetch(url);
         
@@ -81,7 +82,7 @@ async function calculateModule() {
         
         resultsContainer.style.display = "block";
     } catch (err) {
-        errorContainer.innerText = "Error de conexión: No se pudo comunicar con ://onrender.com. Detalles del error: " + err.message;
+        errorContainer.innerText = "Error de conexión con la API (" + err.message + "). Intenta refrescar la página con parámetros diferentes.";
         errorContainer.style.display = "block";
     }
 }
