@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 app = FastAPI(
     title="API Framework V44.2",
@@ -8,14 +7,12 @@ app = FastAPI(
     version="1.0"
 )
 
-# Configuración de CORS correcta que permite recibir peticiones del frontend
-origins = [
-    "*"
-]
+# Configuración de CORS corregida
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # <-- Aquí ya tiene la 's' correcta
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,7 +24,6 @@ def read_root():
 
 @app.get("/v442")
 def calcular_balance(vance: str, presion_central_minima: float, vientos_sostenidos: float):
-    # Lógica interna de análisis predictivo basado en los parámetros meteorológicos recibidos
     r_source = round((vientos_sostenidos * 0.12), 2)
     balance = round((1013 - presion_central_minima) - r_source, 2)
     
