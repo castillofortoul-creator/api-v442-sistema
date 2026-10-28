@@ -35,7 +35,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
-                            datos_nhc["vientos_nhc"] = int(parts[1].split("KT")[0].strip())
+                            datos_nhc["vientos_nhc"] = int(parts.split("KT").strip())
                     break
         except Exception:
             pass # Si falla un feed en la nube, el sistema continúa con el siguiente de forma estable
@@ -90,4 +90,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
