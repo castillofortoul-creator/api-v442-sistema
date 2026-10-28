@@ -3,140 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Framework Predictivo V44.2 - Centro Operativo de Monitoreo</title>
-    <link rel="stylesheet" href="https://unpkg.com" />
+    <title>Framework V44.2 - Mapa + NHC</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: sans-serif; background-color: #0c1917; color: #ffffff; margin: 20px; }
-        .container { max-width: 900px; margin: auto; padding: 20px; background-color: #112622; border: 2px solid #00ffcc; border-radius: 8px; }
-        h2 { text-align: center; color: #00ffcc; border-bottom: 2px solid #00ffcc; padding-bottom: 10px; margin-top: 0; }
-        h4 { text-align: center; color: #aaaaaa; margin-top: -5px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #00ffcc; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; background-color: #0c1917; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background-color: #00aa88; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #00ffcc; color: #0c1917; }
-        .results-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .box { padding: 15px; background-color: #0c1917; border-radius: 4px; border: 1px solid #00ffcc; }
-        #map { height: 350px; width: 100%; border-radius: 4px; border: 1px solid #00ffcc; margin-top: 15px; }
-        .error { margin-top: 20px; padding: 15px; background-color: #4a1a1a; border-radius: 4px; border-left: 5px solid #ff3333; color: #ff9999; text-align: center; font-weight: bold; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .highlight { color: #00ffcc; font-weight: bold; }
+        body { font-family: sans-serif; background:#0c1917; color:#fff; margin:0; padding:15px; }
+        .container { max-width:800px; margin:auto; padding:20px; background:#112622; border:2px solid #00ffcc; border-radius:8px; }
+        h2 { text-align:center; color:#00ffcc; border-bottom:2px solid #00ffcc; padding-bottom:10px; margin-top:0; }
+        h4 { text-align:center; color:#aaa; margin-top:-5px; font-size:13px; }
+        label { display:block; margin:10px 0 5px; font-weight:bold; color:#00ffcc; font-size:12px; }
+        input { width:100%; padding:10px; box-sizing:border-box; background:#0c1917; color:#fff; border:1px solid #00ffcc; border-radius:4px; }
+        button { width:100%; padding:12px; margin-top:15px; background:#00aa88; color:#fff; border:1px solid #00ffcc; border-radius:4px; font-size:16px; cursor:pointer; font-weight:bold; }
+        button:hover { background:#00ffcc; color:#0c1917; }
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .results { margin-top:15px; padding:15px; background:#0c1917; border:1px solid #00ffcc; border-radius:4px; font-size:14px; line-height:1.6; }
+        .comparativa { margin-top:15px; padding:15px; background:#1a3a32; border-left:5px solid #ffcc00; border-radius:4px; }
+        .veredicto { font-weight:bold; color:#00ffcc; font-size:16px; text-align:center; margin:10px 0; }
+        #map { height:400px; margin-top:15px; border:2px solid #00ffcc; border-radius:6px; display:none; }
+        .legend { font-size:12px; margin-top:8px; color:#ccc; }
+        .dot-v442 { color:#ff3333; } .dot-nhc { color:#3388ff; }
+        .error { margin-top:15px; padding:12px; background:#4a1a1a; border-left:5px solid #ff3333; color:#ff9999; font-weight:bold; text-align:center; display:none; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h2>FRAMEWORK PREDICTIVO V44.2</h2>
-    <h4>GRUPO DE DINÁMICA ATMOSFÉRICA AVANZADA - KOMCHÉN, YUCATÁN</h4>
+    <h4>GRUPO DINÁMICA ATMOSFÉRICA - KOMCHÉN + COMPARATIVA NHC TIEMPO REAL</h4>
     
-    <div class="form-group">
-        <label>NOMBRE DEL CICLÓN</label>
-        <input type="text" id="vance" value="VANCE">
+    <label>NOMBRE DEL CICLÓN</label>
+    <input type="text" id="vance" value="vance">
+    
+    <div class="grid">
+        <div><label>PRESIÓN CENTRAL MÍNIMA (MB)</label><input type="number" id="presion" value="1003"></div>
+        <div><label>VIENTOS SOSTENIDOS (KM/H)</label><input type="number" id="vientos" value="65"></div>
     </div>
     
-    <div class="grid-inputs">
-        <div class="form-group">
-            <label>PRESIÓN CENTRAL MÍNIMA (HPA / MB)</label>
-            <input type="number" id="presion_central_minima" value="1003">
-        </div>
-        
-        <div class="form-group">
-            <label>VIENTOS SOSTENIDOS (NUDOS / KT)</label>
-            <input type="number" id="vientos_sostenidos" value="35">
-        </div>
-    </div>
+    <button onclick="ejecutar()">EJECUTAR SIMULACIÓN + MAPA + NHC</button>
     
-    <button onclick="ejecutarSimulacionSegura()">EJECUTAR SIMULACIÓN DE CASO Y MAPEO IN SITU</button>
-    
-    <div id="error-container" class="error" style="display: none;"></div>
-    
-    <div class="results-panel" id="results-panel" style="display: none;">
-        <div class="box">
-            <h3 style="color: #00ffcc; margin-top: 0; border-bottom: 1px solid #00ffcc;">Módulo de Diagnóstico Interno</h3>
-            <p><strong>Ciclón:</strong> <span id="out_nombre" class="highlight"></span></p>
-            <p><strong>R_SOURCE:</strong> <span id="out_r_source"></span></p>
-            <p><strong>BALANCE NETO (B):</strong> <span id="out_balance"></span></p>
-            <p><strong>ZONA PROYECTADA:</strong> <span id="out_zona" style="color: #ffcc00; font-weight: bold;"></span></p>
-            <p><strong>ESTATUS DE TU FÓRMULA:</strong> <br><span id="out_diag" style="font-weight: bold;"></span></p>
-        </div>
-        
-        <div class="box">
-            <h3 style="color: #ffaa00; margin-top: 0; border-bottom: 1px solid #ffaa00;">Validación Real-Time vs. NHC</h3>
-            <p><strong>Boletín Oficial:</strong> <br><span id="nhc_reporte" style="font-size: 13px; color: #aaa;"></span></p>
-            <p><strong>Vientos Actuales NHC:</strong> <span id="nhc_vientos" class="highlight"></span></p>
-            <p><strong>Presión Actual NHC:</strong> <span id="nhc_presion" class="highlight"></span></p>
-            <p style="font-size: 12px; color: #888; margin-top: 25px; border-top: 1px dashed #444; padding-top: 5px;">
-                * Comparativa automatizada vía API de análisis cruzado de datos climatológicos.
-            </p>
-        </div>
-    </div>
-    
-    <div id="map-area" style="display: none;">
-        <h3 style="color: #00ffcc; margin-bottom: 5px;">Geolocalización Dinámica del Centro de Baja Presión</h3>
-        <div id="map"></div>
+    <div id="error" class="error"></div>
+    <div id="results" class="results" style="display:none;"></div>
+    <div id="comparativa" class="comparativa" style="display:none;"></div>
+    <div id="map"></div>
+    <div id="legend" class="legend" style="display:none;">
+        <span class="dot-v442">●</span> Predicción V44.2 Landfall | 
+        <span class="dot-nhc">●</span> Posición Actual NHC
     </div>
 </div>
 
-<script src="https://unpkg.com"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let map;
-let marker;
+const API_URL = "https://api-v442.onrender.com";
+let map, markerV442, markerNHC, line;
 
-function ejecutarSimulacionSegura() {
-    const nombre = document.getElementById('vance').value;
-    const presion = document.getElementById('presion_central_minima').value;
-    const vientos = document.getElementById('vientos_sostenidos').value;
+async function ejecutar(){
+    const v = document.getElementById('vance').value;
+    const p = document.getElementById('presion').value;
+    const wi = document.getElementById('vientos').value;
+    const errDiv = document.getElementById('error');
+    const resDiv = document.getElementById('results');
+    const compDiv = document.getElementById('comparativa');
     
-    const errorContainer = document.getElementById('error-container');
-    const resultsPanel = document.getElementById('results-panel');
-    const mapArea = document.getElementById('map-area');
+    errDiv.style.display="none";
+    resDiv.style.display="none";
+    compDiv.style.display="none";
     
-    errorContainer.style.display = "none";
+    const url = ${API_URL}/v442?vance=${encodeURIComponent(v)}&presion_central_minima=${p}&vientos_sostenidos=${wi};
     
-    // CORRECCIÓN DE ENLACE: Apunta directamente a la ruta /predict configurada en tu backend
-    const URL_API = 'https://onrender.com';
-    
-    fetch(URL_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: nombre, presion: presion, vientos: vientos })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("No se pudo conectar con el servidor API en la nube.");
-        return response.json();
-    })
-    .then(data => {
-        document.getElementById('out_nombre').innerText = data.nombre;
-        document.getElementById('out_r_source').innerText = data.r_source;
-        document.getElementById('out_balance').innerText = data.balance;
-        document.getElementById('out_diag').innerText = data.diagnostico;
-        document.getElementById('out_zona').innerText = data.impacto_zona;
+    try{
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("API dormida o error "+res.status);
+        const data = await res.json();
         
-        document.getElementById('nhc_reporte').innerText = data.nhc_comparativa.reporte_actual;
-        document.getElementById('nhc_vientos').innerText = data.nhc_comparativa.vientos_oficiales;
-        document.getElementById('nhc_presion').innerText = data.nhc_comparativa.presion_oficial;
+        resDiv.style.display="block";
+        resDiv.innerHTML = `
+            <b>MAGNITUD FUENTE (R_SOURCE):</b> ${data.r_source}<br>
+            <b>BALANCE NETO (B):</b> ${data.balance}<br>
+            <b>ESTATUS:</b> ${data.resultado}<br>
+            <b>DONDE VA A PEGAR (V44.2):</b> <span style="color:#ffcc00; font-weight:bold;">${data.landfall_prediccion_v442.lugar}</span><br>
+            Coords: ${data.landfall_prediccion_v442.lat}, ${data.landfall_prediccion_v442.lon}
+        `;
         
-        resultsPanel.style.display = "grid";
-        mapArea.style.display = "block";
+        compDiv.style.display="block";
+        compDiv.innerHTML = `
+            <div class="veredicto">${data.comparativa.veredicto}</div>
+            <b>NHC LIVE:</b> ${data.nhc_live.lat}N ${Math.abs(data.nhc_live.lon)}W - ${data.nhc_live.dist || ''} | Viento ${data.nhc_live.wind_mph||'N/A'} mph<br>
+            <b>NHC WARNINGS:</b> ${data.nhc_live.warnings}<br>
+            <b>VS V44.2:</b> ${data.comparativa.tu_prediccion}<br>
+            <b>AHORRO:</b> ${data.comparativa.ahorro_estimado}<br>
+            <small>Advisory: ${data.nhc_live.advisory || data.nhc_live.raw} | Fuente: nhc.noaa.gov</small>
+        `;
         
-        const coords = data.mapa_coords;
-        if (!map) {
-            map = L.map('map').setView(coords, 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-            marker = L.marker(coords).addTo(map);
-        } else {
-            map.setView(coords, 6);
-            marker.setLatLng(coords);
+        // MAPA
+        document.getElementById('map').style.display="block";
+        document.getElementById('legend').style.display="block";
+        
+        if(!map){
+            map = L.map('map').setView([20, -105], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM + NHC + V44.2' }).addTo(map);
         }
-        marker.bindPopup(`<b>${data.nombre}</b><br>Balance Neto: ${data.balance}`).openPopup();
-    })
-    .catch(err => {
-        errorContainer.innerText = "Error Operacional: " + err.message;
-        errorContainer.style.display = "block";
-    });
-}
-</script>
-</body>
-</html>
+        
+        if(markerV442) map.removeLayer(markerV442);
+        if(markerNHC) map.removeLayer(markerNHC);
+        if(line) map.removeLayer(line);
+        
+        // Marker NHC - Azul
+        const nhcIcon = L.divIcon({html: '<div style="background:#3388ff; width:14px; height:14px; border-radius:50%; border:2px solid white;"></div>', iconSize:[14,14]});
+        markerNHC = L.marker([data.nhc_live.lat, data.nhc_live.lon], {icon: nhcIcon}).addTo(map)
+            .bindPopup(<b>NHC ACTUAL</b><br>${data.nhc_live.lat}N ${Math.abs(data.nhc_live.lon)}W<br>${data.nhc_live.dist}).openPopup();
+        
+        // Marker V44.2 - Rojo solo si hay landfall
+        if(data.landfall_prediccion_v442.lat !== 0){
+            const v442Icon = L.divIcon({html: '<div style="background:#ff3333; width:16px; height:16px; border-radius:50%; border:2px solid white;"></div>', iconSize:[16,16]});
+            markerV442 = L.marker([data.landfall_prediccion_v442.lat, data.landfall_prediccion_v442.lon], {icon: v442Icon}).addTo(map)
+                .bindPopup(<b>V44.2 PREDICCIÓN LANDFALL</b><br>${data.landfall_prediccion_v442.lugar}<br>B=${data.balance});
+            line = L.polyline([[data.nhc_live.lat, data.nhc_live.lon], [data.landfall_prediccion_v442.lat, data.landfall_prediccion_v442.lon]], {color:'#ffcc00', dashArray:'5,10'}).addTo(map);
+            map.fitBounds([[data.nhc_live.lat, data.nhc_live.lon], [data.landfall_prediccion_v442.lat, data.landfall_prediccion_v442.lon]], {padding:[40,40]});
+        } else {
+            // Vance Zero Landfall
+            map.setView([data.nhc_live.lat, data.nhc_live.lon], 6);
+            markerNHC.bindPopup(<b>NHC + V44.2 COINCIDEN</b><br>ZERO LANDFALL DIRECTO<br>Se disipa a ${data.nhc_live.dist}).openPopup();
+        }
+        
+    }catch(e){
+        errDiv.innerText = "Error de conexión con API ("+e.message+"). Render gratis
