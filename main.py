@@ -4,19 +4,19 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Habilitamos CORS de forma segura para eliminar el error "Failed to fetch" de tu escritorio
+# Habilitamos CORS para que tu archivo HTML local pueda conectarse sin el error 'Failed to fetch'
 CORS(app)
 
 def obtener_datos_tiempo_real_nhc(nombre_ciclon):
     """
-    Monitorea en tiempo real los feeds del NHC y extrae las variables del ciclón solicitado.
+    Monitorea en tiempo real los feeds del National Hurricane Center y extrae sus variables.
     """
     feeds = [
-        "https://noaa.gov",  # Atlántico y Golfo
-        "https://noaa.gov"   # Pacífico Oriental
+        "https://noaa.gov",  # Cuenca Atlántico
+        "https://noaa.gov"   # Cuenca Pacífico
     ]
     
-    # Valores de respaldo basados en las observaciones en vivo de Vance / Patricia
+    # Valores por defecto (de respaldo)
     datos_nhc = {"presion_nhc": 1003, "vientos_nhc": 35, "estatus_oficial": "Tormenta Tropical"}
     nombre_busqueda = nombre_ciclon.strip().upper()
 
@@ -35,10 +35,12 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
-                            datos_nhc["vientos_nhc"] = int(parts.split("KT").strip())
+                            # Filtramos los nudos numéricos del reporte
+                            viento_texto = parts[1].split("KT")[0].strip()
+                            datos_nhc["vientos_nhc"] = int(viento_texto)
                     break
         except Exception:
-            pass # Si falla un feed en la nube, el sistema continúa con el siguiente de forma estable
+            pass
             
     return datos_nhc
 
@@ -47,31 +49,31 @@ def predict():
     data = request.get_json() or {}
     nombre = data.get('nombre', 'DESCONOCIDO').upper()
     
-    # Variables de entrada para el Teorema 5 de tu framework (Calibración base en Nudos)
+    # Variables de entrada enviadas desde tu interfaz (Calibradas en nudos)
     presion = float(data.get('presion', 1013))
-    vientos = float(data.get('vientos', 0)) # Entrada directa en nudos
+    vientos = float(data.get('vientos', 0))
     
-    # 1. Ecuación de Magnitud Fuente (RSOURCE) - Framework V44.2
+    # Ecuación 1: Magnitud Fuente (RSOURCE)
     r_source = round(vientos * 0.12, 2)
     
-    # 2. Ecuación de Balance Neto (B) sin división para rangos dinámicos amplios
+    # Ecuación 2: Balance Neto (B)
     balance = round((1013 - presion) - r_source, 2)
     
-    # 3. Criterio de Diagnóstico y Predicción de Impacto Espacial
+    # Ecuación 3: Criterios de diagnóstico y geolocalización de simulación
     if balance > 15:
         diagnostico = "ALTA PROBABILIDAD DE INTENSIFICACIÓN: Las condiciones dinámicas favorecen el desarrollo rápido."
         impacto_zona = "ZONA DE ALTA ALERTA: Trayectoria inminente de colisión destructiva (Landfall)."
-        coordenadas_mapa = [19.2, -104.5] # Coordenadas de simulación de impacto (Ej: Manzanillo/Acapulco)
+        coordenadas_mapa = [19.2, -104.5]  # Simulación costa Pacífico central
     elif balance >= 0:
         diagnostico = "CONDICIÓN ESTABLE: El sistema mantiene su estructura actual sin cambios bruscos inmediatos."
-        impacto_zona = "ZERO LANDFALL: El sistema se debilita en mar abierto sin amenaza de impacto destructor en costa."
-        coordenadas_mapa = [18.5, -106.2] # Coordenadas en aguas abiertas del océano Pacífico
+        impacto_zona = "ZERO LANDFALL: El sistema se debilita en mar abierto sin amenaza de impacto en costa."
+        coordenadas_mapa = [18.5, -106.2]  # Simulación aguas abiertas
     else:
         diagnostico = "TENDENCIA A DISIPACIÓN / DEBILITAMIENTO: La presión interna y la fricción están limitando el sistema."
-        impacto_zona = "SISTEMA EN DISIPACIÓN: Desarticulación total de la circulación ciclónica."
+        impacto_zona = "SISTEMA EN DISIPACIÓN: Desarticulación total de la estructura ciclónica."
         coordenadas_mapa = [17.8, -108.5]
 
-    # Ejecución del módulo de comparación automática en tiempo real con el NHC
+    # Comparativa automática con la NOAA
     nhc_live = obtener_datos_tiempo_real_nhc(nombre)
     
     return jsonify({
@@ -89,4 +91,4 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
