@@ -4,8 +4,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Habilitamos CORS con permisos totales para la nube y el escritorio
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# CORRECCIÓN DE SEGURIDAD INTERNACIONAL: Permisos globales de CORS para enlazar GitHub Pages sin bloqueos
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 def obtener_datos_tiempo_real_nhc(nombre_ciclon):
     """
@@ -35,7 +35,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
-                            viento_texto = parts[1].split("KT")[0].strip()
+                            viento_texto = parts.split("KT").strip()
                             datos_nhc["vientos_nhc"] = int(viento_texto)
                     break
         except Exception:
@@ -43,7 +43,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
             
     return datos_nhc
 
-@app.route('/api/predict', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json() or {}
     nombre = data.get('nombre', 'DESCONOCIDO').upper()
