@@ -35,7 +35,6 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
-                            # Filtramos los nudos numéricos del reporte
                             viento_texto = parts[1].split("KT")[0].strip()
                             datos_nhc["vientos_nhc"] = int(viento_texto)
                     break
@@ -91,4 +90,7 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # TRUCO DE PUERTO ADAPTATIVO PARA ELIMINAR EL ERROR EN RENDER
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
