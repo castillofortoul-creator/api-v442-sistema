@@ -1,42 +1,146 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Framework Predictivo V44.2 - Centro Operativo de Monitoreo</title>
+    <!-- Importación de estilos del motor de mapas interactivos -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <style>
+        body { font-family: sans-serif; background-color: #0c1917; color: #ffffff; margin: 20px; }
+        .container { max-width: 900px; margin: auto; padding: 20px; background-color: #112622; border: 2px solid #00ffcc; border-radius: 8px; }
+        h2 { text-align: center; color: #00ffcc; border-bottom: 2px solid #00ffcc; padding-bottom: 10px; margin-top: 0; }
+        h4 { text-align: center; color: #aaaaaa; margin-top: -5px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #00ffcc; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; background-color: #0c1917; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background-color: #00aa88; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #00ffcc; color: #0c1917; }
+        .results-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .box { padding: 15px; background-color: #0c1917; border-radius: 4px; border: 1px solid #00ffcc; }
+        #map { height: 350px; width: 100%; border-radius: 4px; border: 1px solid #00ffcc; margin-top: 15px; }
+        .error { margin-top: 20px; padding: 15px; background-color: #4a1a1a; border-radius: 4px; border-left: 5px solid #ff3333; color: #ff9999; text-align: center; font-weight: bold; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .highlight { color: #00ffcc; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-app = FastAPI(
-    title="API Framework V44.2",
-    description="Sistema de predicción de condiciones de ciclogénesis",
-    version="1.0"
-)
-
-# Configuración global de orígenes permitidos
-origins = ["*"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def read_root():
-    return {"status": "online", "message": "API de Framework V44.2 activa y respondiendo"}
-
-@app.get("/v442")
-def calcular_balance(vance: str, presion_central_minima: float, vientos_sostenidos: float):
-    r_source = round((vientos_sostenidos * 0.12), 2)
-    balance = round((1013 - presion_central_minima) - r_source, 2)
+<div class="container">
+    <h2>FRAMEWORK PREDICTIVO V44.2</h2>
+    <h4>GRUPO DE DINÁMICA ATMOSFÉRICA AVANZADA - KOMCHÉN, YUCATÁN</h4>
     
-    if balance > 15:
-        resultado = "ALTA PROBABILIDAD DE INTENSIFICACIÓN: Las condiciones dinámicas favorecen el desarrollo rápido."
-    elif balance >= 0:
-        resultado = "CONDICIÓN ESTABLE: El sistema mantiene su estructura actual sin cambios bruscos inmediatos."
-    else:
-        resultado = "TENDENCIA A DISIPACIÓN / DEBILITAMIENTO: La presión interna y la fricción están limitando el sistema."
+    <div class="form-group">
+        <label>NOMBRE DEL CICLÓN</label>
+        <input type="text" id="vance" value="VANCE">
+    </div>
+    
+    <div class="grid-inputs">
+        <div class="form-group">
+            <label>PRESIÓN CENTRAL MÍNIMA (HPA / MB)</label>
+            <input type="number" id="presion_central_minima" value="1003">
+        </div>
         
-    return {
-        "ciclón": vance,
-        "r_source": r_source,
-        "balance": balance,
-        "resultado": resultado
-    }
+        <div class="form-group">
+            <label>VIENTOS SOSTENIDOS (NUDOS / KT)</label>
+            <input type="number" id="vientos_sostenidos" value="35">
+        </div>
+    </div>
+    
+    <button onclick="ejecutarSimulacionSegura()">EJECUTAR SIMULACIÓN DE CASO Y MAPEO IN SITU</button>
+    
+    <div id="error-container" class="error" style="display: none;"></div>
+    
+    <div class="results-panel" id="results-panel" style="display: none;">
+        <div class="box">
+            <h3 style="color: #00ffcc; margin-top: 0; border-bottom: 1px solid #00ffcc;">Módulo de Diagnóstico Interno</h3>
+            <p><strong>Ciclón:</strong> <span id="out_nombre" class="highlight"></span></p>
+            <p><strong>R_SOURCE:</strong> <span id="out_r_source"></span></p>
+            <p><strong>BALANCE NETO (B):</strong> <span id="out_balance"></span></p>
+            <p><strong>ZONA PROYECTADA:</strong> <span id="out_zona" style="color: #ffcc00; font-weight: bold;"></span></p>
+            <p><strong>ESTATUS DE TU FÓRMULA:</strong> <br><span id="out_diag" style="font-weight: bold;"></span></p>
+        </div>
+        
+        <div class="box">
+            <h3 style="color: #ffaa00; margin-top: 0; border-bottom: 1px solid #ffaa00;">Validación Real-Time vs. NHC</h3>
+            <p><strong>Boletín Oficial:</strong> <br><span id="nhc_reporte" style="font-size: 13px; color: #aaa;"></span></p>
+            <p><strong>Vientos Actuales NHC:</strong> <span id="nhc_vientos" class="highlight"></span></p>
+            <p><strong>Presión Actual NHC:</strong> <span id="nhc_presion" class="highlight"></span></p>
+            <p style="font-size: 12px; color: #888; margin-top: 25px; border-top: 1px dashed #444; padding-top: 5px;">
+                * Comparativa automatizada vía API de análisis cruzado de datos climatológicos.
+            </p>
+        </div>
+    </div>
+    
+    <div id="map-area" style="display: none;">
+        <h3 style="color: #00ffcc; margin-bottom: 5px;">Geolocalización Dinámica del Centro de Baja Presión</h3>
+        <div id="map"></div>
+    </div>
+</div>
+
+<!-- Scripts del Motor de Mapeo Geográfico -->
+<script src="https://unpkg.com"></script>
+<script>
+let map;
+let marker;
+
+function ejecutarSimulacionSegura() {
+    const nombre = document.getElementById('vance').value;
+    const presion = document.getElementById('presion_central_minima').value;
+    const vientos = document.getElementById('vientos_sostenidos').value;
+    
+    const errorContainer = document.getElementById('error-container');
+    const resultsPanel = document.getElementById('results-panel');
+    const mapArea = document.getElementById('map-area');
+    
+    errorContainer.style.display = "none";
+    
+    // Apunta a la URL de tu API local o de tu servidor web en Render
+    fetch('http://localhost:5000/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nombre, presion: presion, vientos: vientos })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("No se pudo conectar con el servidor API.");
+        return response.json();
+    })
+    .then(data => {
+        // Inyección instantánea de resultados calculados de forma privada por el backend
+        document.getElementById('out_nombre').innerText = data.nombre;
+        document.getElementById('out_r_source').innerText = data.r_source;
+        document.getElementById('out_balance').innerText = data.balance;
+        document.getElementById('out_diag').innerText = data.diagnostico;
+        document.getElementById('out_zona').innerText = data.impacto_zona;
+        
+        // Mapeo de la comparativa en vivo contra NOAA / NHC
+        document.getElementById('nhc_reporte').innerText = data.nhc_comparativa.reporte_actual;
+        document.getElementById('nhc_vientos').innerText = data.nhc_comparativa.vientos_oficiales;
+        document.getElementById('nhc_presion').innerText = data.nhc_comparativa.presion_oficial;
+        
+        resultsPanel.style.display = "grid";
+        mapArea.style.display = "block";
+        
+        // Inicialización o refresco dinámico del mapa Leaflet
+        const coords = data.mapa_coords;
+        if (!map) {
+            map = L.map('map').setView(coords, 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            marker = L.marker(coords).addTo(map);
+        } else {
+            map.setView(coords, 6);
+            marker.setLatLng(coords);
+        }
+        marker.bindPopup(`<b>${data.nombre}</b><br>Balance Neto: ${data.balance}<br>${data.impacto_zona}`).openPopup();
+    })
+    .catch(err => {
+        errorContainer.innerText = "Error Operacional: " + err.message + " Asegúrate de que main.py esté ejecutándose en el puerto 5000.";
+        errorContainer.style.display = "block";
+    });
+}
+</script>
+</body>
+</html>
+
