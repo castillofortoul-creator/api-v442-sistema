@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Framework Predictivo V44.2</title>
+    <title>Framework Predictivo V44.2 - Centro Operativo de Monitoreo</title>
+    <!-- Importación de estilos del motor de mapas interactivos -->
+    <link rel="stylesheet" href="https://unpkg.com" />
     <style>
         body { font-family: sans-serif; background-color: #0c1917; color: #ffffff; margin: 20px; }
-        .container { max-width: 600px; margin: auto; padding: 20px; background-color: #112622; border: 2px solid #00ffcc; border-radius: 8px; }
+        .container { max-width: 900px; margin: auto; padding: 20px; background-color: #112622; border: 2px solid #00ffcc; border-radius: 8px; }
         h2 { text-align: center; color: #00ffcc; border-bottom: 2px solid #00ffcc; padding-bottom: 10px; margin-top: 0; }
         h4 { text-align: center; color: #aaaaaa; margin-top: -5px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #00ffcc; }
         input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; background-color: #0c1917; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background-color: #00aa88; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button { width: 100%; padding: 12px; background-color: #00aa88; color: #fff; border: 1px solid #00ffcc; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #00ffcc; color: #0c1917; }
-        .results { margin-top: 20px; padding: 15px; background-color: #0c1917; border-radius: 4px; border: 1px solid #00ffcc; }
+        .results-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .box { padding: 15px; background-color: #0c1917; border-radius: 4px; border: 1px solid #00ffcc; }
+        #map { height: 350px; width: 100%; border-radius: 4px; border: 1px solid #00ffcc; margin-top: 15px; }
         .error { margin-top: 20px; padding: 15px; background-color: #4a1a1a; border-radius: 4px; border-left: 5px solid #ff3333; color: #ff9999; text-align: center; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .highlight { color: #00ffcc; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -26,69 +31,115 @@
     <h4>GRUPO DE DINÁMICA ATMOSFÉRICA AVANZADA - KOMCHÉN, YUCATÁN</h4>
     
     <div class="form-group">
-        <label for="vance">NOMBRE DEL CICLÓN</label>
-        <input type="text" id="vance" value="patricia">
+        <label>NOMBRE DEL CICLÓN</label>
+        <input type="text" id="vance" value="VANCE">
     </div>
     
-    <div class="grid">
+    <div class="grid-inputs">
         <div class="form-group">
-            <label for="presion_central_minima">PRESIÓN CENTRAL MÍNIMA (HPA / MB)</label>
-            <input type="number" id="presion_central_minima" value="950">
+            <label>PRESIÓN CENTRAL MÍNIMA (HPA / MB)</label>
+            <input type="number" id="presion_central_minima" value="1003">
         </div>
         
         <div class="form-group">
-            <label for="vientos_sostenidos">VIENTOS SOSTENIDOS (KM/H)</label>
-            <input type="number" id="vientos_sostenidos" value="165">
+            <label>VIENTOS SOSTENIDOS (NUDOS / KT)</label>
+            <input type="number" id="vientos_sostenidos" value="35">
         </div>
     </div>
     
-    <button onclick="calculateModule()">EJECUTAR SIMULACIÓN CIEGA</button>
+    <button onclick="ejecutarSimulacionSegura()">EJECUTAR SIMULACIÓN DE CASO Y MAPEO IN SITU</button>
     
     <div id="error-container" class="error" style="display: none;"></div>
     
-    <div id="results-container" class="results" style="display: none;">
-        <p><strong>MAGNITUD FUENTE (R_SOURCE):</strong> <span id="r_source_val"></span></p>
-        <p><strong>BALANCE NETO (B):</strong> <span id="balance_val"></span></p>
-        <p><strong>ESTATUS DEL DIAGNÓSTICO:</strong> <span id="diag_val"></span></p>
+    <div class="results-panel" id="results-panel" style="display: none;">
+        <div class="box">
+            <h3 style="color: #00ffcc; margin-top: 0; border-bottom: 1px solid #00ffcc;">Módulo de Diagnóstico Interno</h3>
+            <p><strong>Ciclón:</strong> <span id="out_nombre" class="highlight"></span></p>
+            <p><strong>R_SOURCE:</strong> <span id="out_r_source"></span></p>
+            <p><strong>BALANCE NETO (B):</strong> <span id="out_balance"></span></p>
+            <p><strong>ZONA PROYECTADA:</strong> <span id="out_zona" style="color: #ffcc00; font-weight: bold;"></span></p>
+            <p><strong>ESTATUS DE TU FÓRMULA:</strong> <br><span id="out_diag" style="font-weight: bold;"></span></p>
+        </div>
+        
+        <div class="box">
+            <h3 style="color: #ffaa00; margin-top: 0; border-bottom: 1px solid #ffaa00;">Validación Real-Time vs. NHC</h3>
+            <p><strong>Boletín Oficial:</strong> <br><span id="nhc_reporte" style="font-size: 13px; color: #aaa;"></span></p>
+            <p><strong>Vientos Actuales NHC:</strong> <span id="nhc_vientos" class="highlight"></span></p>
+            <p><strong>Presión Actual NHC:</strong> <span id="nhc_presion" class="highlight"></span></p>
+            <p style="font-size: 12px; color: #888; margin-top: 25px; border-top: 1px dashed #444; padding-top: 5px;">
+                * Comparativa automatizada vía API de análisis cruzado de datos climatológicos.
+            </p>
+        </div>
+    </div>
+    
+    <div id="map-area" style="display: none;">
+        <h3 style="color: #00ffcc; margin-bottom: 5px;">Geolocalización Dinámica del Centro de Baja Presión</h3>
+        <div id="map"></div>
     </div>
 </div>
 
+<!-- Scripts del Motor de Mapeo Geográfico -->
+<script src="https://unpkg.com"></script>
 <script>
-async function calculateModule() {
-    // Captura directa de valores para asegurar compatibilidad total con la URL
-    const vanceValue = document.getElementById('vance').value;
-    const presionValue = document.getElementById('presion_central_minima').value;
-    const vientosValue = document.getElementById('vientos_sostenidos').value;
+let map;
+let marker;
+
+function ejecutarSimulacionSegura() {
+    const nombre = document.getElementById('vance').value;
+    const presion = document.getElementById('presion_central_minima').value;
+    const vientos = document.getElementById('vientos_sostenidos').value;
     
     const errorContainer = document.getElementById('error-container');
-    const resultsContainer = document.getElementById('results-container');
+    const resultsPanel = document.getElementById('results-panel');
+    const mapArea = document.getElementById('map-area');
     
     errorContainer.style.display = "none";
-    resultsContainer.style.display = "none";
     
-    try {
-        // Generación de URL limpia con variables perfectamente emparejadas
-        const url = `https://onrender.com{encodeURIComponent(vanceValue)}&presion_central_minima=${presionValue}&vientos_sostenidos=${vientosValue}`;
-        const res = await fetch(url);
+    // Apunta a la URL de tu API local o de tu servidor web en Render
+    fetch('http://localhost:5000/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nombre, presion: presion, vientos: vientos })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("No se pudo conectar con el servidor API.");
+        return response.json();
+    })
+    .then(data => {
+        // Inyección instantánea de resultados calculados de forma privada por el backend
+        document.getElementById('out_nombre').innerText = data.nombre;
+        document.getElementById('out_r_source').innerText = data.r_source;
+        document.getElementById('out_balance').innerText = data.balance;
+        document.getElementById('out_diag').innerText = data.diagnostico;
+        document.getElementById('out_zona').innerText = data.impacto_zona;
         
-        if (!res.ok) {
-            throw new Error(`El servidor respondió con código: ${res.status}`);
+        // Mapeo de la comparativa en vivo contra NOAA / NHC
+        document.getElementById('nhc_reporte').innerText = data.nhc_comparativa.reporte_actual;
+        document.getElementById('nhc_vientos').innerText = data.nhc_comparativa.vientos_oficiales;
+        document.getElementById('nhc_presion').innerText = data.nhc_comparativa.presion_oficial;
+        
+        resultsPanel.style.display = "grid";
+        mapArea.style.display = "block";
+        
+        // Inicialización o refresco dinámico del mapa Leaflet
+        const coords = data.mapa_coords;
+        if (!map) {
+            map = L.map('map').setView(coords, 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            marker = L.marker(coords).addTo(map);
+        } else {
+            map.setView(coords, 6);
+            marker.setLatLng(coords);
         }
-        
-        const data = await res.json();
-        
-        document.getElementById('r_source_val').innerText = data.r_source;
-        document.getElementById('balance_val').innerText = data.balance;
-        document.getElementById('diag_val').innerText = data.resultado;
-        
-        resultsContainer.style.display = "block";
-    } catch (err) {
-        errorContainer.innerText = "Error de conexión con la API (" + err.message + "). Intenta refrescar la página con parámetros diferentes.";
+        marker.bindPopup(`<b>${data.nombre}</b><br>Balance Neto: ${data.balance}<br>${data.impacto_zona}`).openPopup();
+    })
+    .catch(err => {
+        errorContainer.innerText = "Error Operacional: " + err.message + " Asegúrate de que main.py esté ejecutándose en el puerto 5000.";
         errorContainer.style.display = "block";
-    }
+    });
 }
 </script>
-
 </body>
 </html>
-
