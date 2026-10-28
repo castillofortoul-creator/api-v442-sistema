@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Framework Predictivo V44.2 - Centro Operativo de Monitoreo</title>
-    <!-- Importación de estilos del motor de mapas interactivos -->
     <link rel="stylesheet" href="https://unpkg.com" />
     <style>
         body { font-family: sans-serif; background-color: #0c1917; color: #ffffff; margin: 20px; }
@@ -78,7 +77,6 @@
     </div>
 </div>
 
-<!-- Scripts del Motor de Mapeo Geográfico -->
 <script src="https://unpkg.com"></script>
 <script>
 let map;
@@ -95,25 +93,25 @@ function ejecutarSimulacionSegura() {
     
     errorContainer.style.display = "none";
     
-    // Apunta a la URL de tu API local o de tu servidor web en Render
-    fetch('http://localhost:5000/api/predict', {
+    // ENLACE DIRECTO CONFIGURADO CON TU SERVIDOR REAL EN LA NUBE
+    const URL_API = 'https://onrender.com';
+    
+    fetch(URL_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: nombre, presion: presion, vientos: vientos })
     })
     .then(response => {
-        if (!response.ok) throw new Error("No se pudo conectar con el servidor API.");
+        if (!response.ok) throw new Error("No se pudo conectar con el servidor API en la nube.");
         return response.json();
     })
     .then(data => {
-        // Inyección instantánea de resultados calculados de forma privada por el backend
         document.getElementById('out_nombre').innerText = data.nombre;
         document.getElementById('out_r_source').innerText = data.r_source;
         document.getElementById('out_balance').innerText = data.balance;
         document.getElementById('out_diag').innerText = data.diagnostico;
         document.getElementById('out_zona').innerText = data.impacto_zona;
         
-        // Mapeo de la comparativa en vivo contra NOAA / NHC
         document.getElementById('nhc_reporte').innerText = data.nhc_comparativa.reporte_actual;
         document.getElementById('nhc_vientos').innerText = data.nhc_comparativa.vientos_oficiales;
         document.getElementById('nhc_presion').innerText = data.nhc_comparativa.presion_oficial;
@@ -121,7 +119,6 @@ function ejecutarSimulacionSegura() {
         resultsPanel.style.display = "grid";
         mapArea.style.display = "block";
         
-        // Inicialización o refresco dinámico del mapa Leaflet
         const coords = data.mapa_coords;
         if (!map) {
             map = L.map('map').setView(coords, 6);
@@ -133,10 +130,10 @@ function ejecutarSimulacionSegura() {
             map.setView(coords, 6);
             marker.setLatLng(coords);
         }
-        marker.bindPopup(`<b>${data.nombre}</b><br>Balance Neto: ${data.balance}<br>${data.impacto_zona}`).openPopup();
+        marker.bindPopup(`<b>${data.nombre}</b><br>Balance Neto: ${data.balance}`).openPopup();
     })
     .catch(err => {
-        errorContainer.innerText = "Error Operacional: " + err.message + " Asegúrate de que main.py esté ejecutándose en el puerto 5000.";
+        errorContainer.innerText = "Error Operacional: " + err.message;
         errorContainer.style.display = "block";
     });
 }
