@@ -4,8 +4,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Habilitamos CORS para que tu archivo HTML local pueda conectarse sin el error 'Failed to fetch'
-CORS(app)
+# Habilitamos CORS con permisos totales para la nube y el escritorio
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 def obtener_datos_tiempo_real_nhc(nombre_ciclon):
     """
