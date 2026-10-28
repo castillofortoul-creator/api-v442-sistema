@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-# CORRECCIÓN DE SEGURIDAD INTERNACIONAL: Permisos globales de CORS para enlazar GitHub Pages sin bloqueos
+# CORRECCIÓN DEFINITIVA DE CORS: Permisos globales abiertos para eliminar el 'Failed to fetch'
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 def obtener_datos_tiempo_real_nhc(nombre_ciclon):
@@ -35,7 +35,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
-                            viento_texto = parts.split("KT").strip()
+                            viento_texto = parts[1].split("KT")[0].strip()
                             datos_nhc["vientos_nhc"] = int(viento_texto)
                     break
         except Exception:
@@ -90,7 +90,7 @@ def predict():
     })
 
 if __name__ == '__main__':
-    # TRUCO DE PUERTO ADAPTATIVO PARA ELIMINAR EL ERROR EN RENDER
+    # Puerto adaptativo dinámico para Render
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
