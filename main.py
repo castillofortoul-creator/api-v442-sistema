@@ -31,9 +31,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
                 description = item.find('description').text if item.find('description') is not None else ""
                 
                 if nombre_busqueda in title:
-                    # Guardamos la metadata oficial del reporte para comparativa directa
                     datos_nhc["estatus_oficial"] = title
-                    # El parser analiza el boletín buscando patrones estándar de presión y viento
                     if "KNOTS" in description:
                         parts = description.split("MAX SUSTAINED WINDS")
                         if len(parts) > 1:
@@ -44,7 +42,7 @@ def obtener_datos_tiempo_real_nhc(nombre_ciclon):
             
     return datos_nhc
 
-@app.route('/api/predict',彻 methods=['POST'])
+@app.route('/api/predict', methods=['POST'])
 def predict():
     data = request.get_json() or {}
     nombre = data.get('nombre', 'DESCONOCIDO').upper()
